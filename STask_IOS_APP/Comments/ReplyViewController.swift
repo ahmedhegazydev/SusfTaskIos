@@ -101,6 +101,9 @@ class ReplyViewController: UIViewController
         ivSendComment.isUserInteractionEnabled = true;
         
         labelCurrentComment.text = comment?.commentData?.htmlToString
+        labelCurrentComment.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleOnMainCmtClicked)))
+        labelCurrentComment.isUserInteractionEnabled = true;
+        
         
         
         
@@ -591,6 +594,17 @@ class ReplyViewController: UIViewController
         
         
     }
+    
+    @objc func handleOnMainCmtClicked(){
+        let alert = UIAlertController(title: Constants.APP_NAME, message: labelCurrentComment.text, preferredStyle: .alert)
+                                 alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: nil))
+                     //            alert.addAction(UIAlertAction(title: "No", style: .cancel, handler: nil))
+                                 self.present(alert, animated: true)
+                      
+               
+            
+        
+     }
     
     @IBAction func btnClose(_ sender: Any) {
         
