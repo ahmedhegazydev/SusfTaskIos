@@ -204,7 +204,7 @@ extension AppDelegate: MessagingDelegate{
     
     func messaging(_ messaging: Messaging, didReceive remoteMessage: MessagingRemoteMessage) {
         print("Message data = \(remoteMessage.appData)")
-        
+        self.remoteMessage = remoteMessage
         
 //        let d : [String : Any] = remoteMessage.appData["notification"] as! [String : Any]
 //        let body : String = d["body"] as! String
