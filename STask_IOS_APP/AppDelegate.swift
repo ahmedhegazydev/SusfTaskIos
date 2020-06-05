@@ -34,17 +34,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MOLHResetable {
 
         //        let pushManager = PushNotificationManager(userID: "currently_logged_in_user_id")
         //        pushManager.registerForPushNotifications()
+     // Register notifications
         if #available(iOS 10.0, *) {
             // For iOS 10 display notification (sent via APNS)
             UNUserNotificationCenter.current().delegate = self
-            let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-            UNUserNotificationCenter.current().requestAuthorization(
-                options: authOptions,
-                completionHandler: {_, _ in })
+            
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {
+                (granted, error) in
+                print("Permission granted: \(granted)")
+                
+                guard granted else { return }
+                self.getNotificationSettings()
+            }
         } else {
             let settings: UIUserNotificationSettings =
                 UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
             application.registerUserNotificationSettings(settings)
+            
         }
         Messaging.messaging().delegate = self
         Messaging.messaging().isAutoInitEnabled = true
@@ -71,6 +77,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MOLHResetable {
     }
     
     
+    func getNotificationSettings() {
+        UNUserNotificationCenter.current().getNotificationSettings { (settings) in
+            print("Notification settings: \(settings)")
+            guard settings.authorizationStatus == .authorized else { return }
+            
+        }
+    }
     
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -95,75 +108,75 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MOLHResetable {
     }
     
     
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
-        // If you are receiving a notification message while your app is in the background,
-        // this callback will not be fired till the user taps on the notification launching the application.
-        // TODO: Handle data of notification
-        
-        // With swizzling disabled you must let Messaging know about the message, for Analytics
-        // Messaging.messaging().appDidReceiveMessage(userInfo)
-        
-        // Print message ID.
-        if let messageID = userInfo[gcmMessageIDKey] {
-            print("Message ID: \(messageID)")
-        }
-        
-        // Print full message.
-        print(userInfo)
-    }
+//    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
+//        // If you are receiving a notification message while your app is in the background,
+//        // this callback will not be fired till the user taps on the notification launching the application.
+//        // TODO: Handle data of notification
+//
+//        // With swizzling disabled you must let Messaging know about the message, for Analytics
+//        // Messaging.messaging().appDidReceiveMessage(userInfo)
+//
+//        // Print message ID.
+//        if let messageID = userInfo[gcmMessageIDKey] {
+//            print("Message ID: \(messageID)")
+//        }
+//
+//        // Print full message.
+//        print(userInfo)
+//    }
     
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        self.userInfo = userInfo
-        // If you are receiving a notification message while your app is in the background,
-        // this callback will not be fired till the user taps on the notification launching the application.
-        // TODO: Handle data of notification
-        
-        // With swizzling disabled you must let Messaging know about the message, for Analytics
-        // Messaging.messaging().appDidReceiveMessage(userInfo)
-        //        // Print message ID.
-        //        if let messageID = userInfo[gcmMessageIDKey] {
-        //            print("Message ID: \(messageID)")
-        //        }
-        // Print full message.
-        print(userInfo)
-        
-        switch UIApplication.shared.applicationState {
-        case .active:
-            //app is currently active, can update badges count here
-            break
-        case .inactive:
-            //app is transitioning from background to foreground (user taps notification), do what you need when user taps here
-            break
-        case .background:
-            //app is in background, if content-available key of your notification is set to 1, poll to your backend to retrieve data and update your interface here
-            break
-        default:
-            break
-        }
-        
-        if let data = userInfo["data"] as? NSDictionary {
-            if let byName = data["alert"] as? String {}
-            if let content = data["content"] as? String {}
-            if let boardId = data["boardId"] as? String {
-                if !boardId.isEmpty{
-//                    let storyboard = UIStoryboard(name: "Board", bundle: nil)
-//                    let homeVc = storyboard.instantiateViewController(withIdentifier: "HomePage") as! SSCustomTabBarViewController
-//                    //UserDefaults.standard.setValue(Constants.DATA_BOARD_ID, forKey: boardId)
-//                    self.window?.rootViewController = homeVc
-                    
-                }
-            }
-        }
-        
-        let storyboard = UIStoryboard(name: "Board", bundle: nil)
-        let homeVc = storyboard.instantiateViewController(withIdentifier: "HomePage") as! SSCustomTabBarViewController
-        //UserDefaults.standard.setValue(Constants.DATA_BOARD_ID, forKey: boardId)
-        self.window?.rootViewController = homeVc
-        
-        
-        completionHandler(UIBackgroundFetchResult.newData)
-    }
+//    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+//                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+//        self.userInfo = userInfo
+//        // If you are receiving a notification message while your app is in the background,
+//        // this callback will not be fired till the user taps on the notification launching the application.
+//        // TODO: Handle data of notification
+//
+//        // With swizzling disabled you must let Messaging know about the message, for Analytics
+//        // Messaging.messaging().appDidReceiveMessage(userInfo)
+//        //        // Print message ID.
+//        //        if let messageID = userInfo[gcmMessageIDKey] {
+//        //            print("Message ID: \(messageID)")
+//        //        }
+//        // Print full message.
+//        print(userInfo)
+//
+//        switch UIApplication.shared.applicationState {
+//        case .active:
+//            //app is currently active, can update badges count here
+//            break
+//        case .inactive:
+//            //app is transitioning from background to foreground (user taps notification), do what you need when user taps here
+//            break
+//        case .background:
+//            //app is in background, if content-available key of your notification is set to 1, poll to your backend to retrieve data and update your interface here
+//            break
+//        default:
+//            break
+//        }
+//
+//        if let data = userInfo["data"] as? NSDictionary {
+//            if let byName = data["alert"] as? String {}
+//            if let content = data["content"] as? String {}
+//            if let boardId = data["boardId"] as? String {
+//                if !boardId.isEmpty{
+////                    let storyboard = UIStoryboard(name: "Board", bundle: nil)
+////                    let homeVc = storyboard.instantiateViewController(withIdentifier: "HomePage") as! SSCustomTabBarViewController
+////                    //UserDefaults.standard.setValue(Constants.DATA_BOARD_ID, forKey: boardId)
+////                    self.window?.rootViewController = homeVc
+//
+//                }
+//            }
+//        }
+//
+//        let storyboard = UIStoryboard(name: "Board", bundle: nil)
+//        let homeVc = storyboard.instantiateViewController(withIdentifier: "HomePage") as! SSCustomTabBarViewController
+//        //UserDefaults.standard.setValue(Constants.DATA_BOARD_ID, forKey: boardId)
+//        self.window?.rootViewController = homeVc
+//
+//
+//        completionHandler(UIBackgroundFetchResult.newData)
+//    }
     
 }
 
@@ -171,20 +184,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MOLHResetable {
 extension AppDelegate : UNUserNotificationCenterDelegate {
     
     // Receive displayed notifications for iOS 10 devices.
-    
-    
+    // this fire when tap notification when forground or background
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @ escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
         // Print message ID.
-        if let messageID = userInfo[gcmMessageIDKey] {
-            print("Message ID: \(messageID)")
-        }
+//        if let messageID = userInfo[gcmMessageIDKey] {
+//            print("Message ID: \(messageID)")
+//        }
+//        // Print full message.
+//        print(userInfo)
         
-        // Print full message.
-        print(userInfo)
-        
+        self.userInfo = userInfo
         completionHandler()
     }
 }

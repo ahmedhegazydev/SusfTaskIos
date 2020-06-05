@@ -36,25 +36,35 @@ class ProfileViewController: UIViewController {
         
         
         let appDelegate = UIApplication.shared.delegate as? AppDelegate
-        let userInfo: [AnyHashable: Any]? = appDelegate!.userInfo
-        if let remoteMessage = appDelegate!.remoteMessage{
+        let userInfo: [AnyHashable: Any]?
+        if let userInfo = appDelegate!.userInfo{
+            if let data = userInfo["data"] as? NSDictionary {
+                //                if let byName = data["alert"] as? String {}
+                //                if let content = data["content"] as? String {}
+                //                if let boardId = data["boardId"] as? String {
+                //                    if !boardId.isEmpty{
+                //                        self.lblName.text = boardId
+                //                    }
+                //                }
+                if let theJSONData = try?  JSONSerialization.data(
+                    withJSONObject: data,
+                    options: .prettyPrinted
+                    ),
+                    let theJSONText = String(data: theJSONData,
+                                             encoding: String.Encoding.ascii) {
+                    print("JSON string = \n\(theJSONText)")
+                    self.lblNotificationDetails.text = theJSONText
+                    
+                }
+                
+            }
             
-            //        if let data = userInfo!["data"] as? NSDictionary {
-            //                    if let byName = data["alert"] as? String {}
-            //                    if let content = data["content"] as? String {}
-            //                    if let boardId = data["boardId"] as? String {
-            //                        if !boardId.isEmpty{
-            //                            self.lblName.text = boardId
-            //                        }
-            //                    }
-            //                }
             
-            
-            let d : [String : Any] = remoteMessage.appData["notification"] as! [String : Any]
-            let body : String = d["body"] as! String
-            let title : String = d["title"] as! String
-            self.lblNotificationDetails.text = "body = \(body) title = \(title) appData = \(remoteMessage.appData)"
-            
+            //            let d : [String : Any] = remoteMessage.appData["notification"] as! [String : Any]
+            //            let body : String = d["body"] as! String
+            //            let title : String = d["title"] as! String
+            //            self.lblNotificationDetails.text = "body = \(body) title = \(title) appData = \(remoteMessage.appData)"
+            //
             
             
         }
